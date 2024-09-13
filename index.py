@@ -33,8 +33,10 @@ def slide_up(event):
 # Función para traer la ventana al frente
 def activate_window(hwnd):
     try:
-        win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)  # Si está minimizada, restaurarla
-        win32gui.SetForegroundWindow(hwnd)  # Traerla al frente
+      #   win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)  # Si está minimizada, restaurarla
+      win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)  # Restaurar la ventana si está minimizada
+      win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)  # Maximizar la ventana
+      
     except Exception as e:
         print(f"Error al activar la ventana: {e}")
 
@@ -75,15 +77,6 @@ root.overrideredirect(True)  # Elimina la barra de título
 root.configure(bg='#000000')
 root.attributes('-alpha', 0.8)
 root.attributes('-topmost', True)
-
-# desktop_button.place(x=screen_width-50 ,y=0)
-
-# padding_frame = tk.Frame(root, height=10, width=2, bg='gray')
-# padding_frame.pack(  side='bottom')
-
-# Asociar los eventos de hover
-# root.bind('<Enter>', slide_down)  # Cuando el ratón entra en la ventana
-# root.bind('<Leave>',slide_up) 
 
 def on_taskbar_click(event):
    show_desktop()
