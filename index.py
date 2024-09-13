@@ -36,8 +36,6 @@ def activate_window(hwnd):
         win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)  # Maximizar la ventana
     except Exception as e:
         print(f"Error al activar la ventana: {e}")
-
-
 # Función para listar las ventanas activas
 def listar_aplicaciones_abiertas():
     def enum_windows_callback(hwnd, windows):
@@ -67,27 +65,40 @@ def listar_aplicaciones_abiertas():
             app_icon.pack(side='right', padx=5)
             app_icon.bind("<Button-1>", lambda event,
                           hwnd=hwnd: activate_window(hwnd))
+
+    desktop_button = tk.Button(taskbar_frame, text="Desktop", command=show_desktop,
+                           background='#ec0d0d', relief='flat', height=50)
+    desktop_button.pack(side='right', fill='y')
+
     root.after(2000, listar_aplicaciones_abiertas)
     
 
 root.geometry(f'{final_screen}x5+{position_x}+{0}')
-
 root.overrideredirect(True)  # Elimina la barra de título
 root.configure(bg='#000000')
 root.attributes('-alpha', 0.8)
 root.attributes('-topmost', True)
 
-
 def on_taskbar_click(event):
-    show_desktop()
+    root.quit()
+    # show_desktop()
+
+def show_desktop(event):
+    pyautogui.hotkey('win', 'd')
+
+cont_app = tk.Frame(root , bg='#f77f0e', width=final_screen )
+cont_app.pack(fill='both' ,)
+cont_app.bind("<Button-1>",show_desktop)
+button = tk.Button(cont_app, text='Close',  background='#fff', command=root.quit)
+button.pack(side='left',)
 
 
-taskbar_frame = tk.Frame(root, bg='#000000', width=final_screen)
-taskbar_frame.pack(fill='both',)
+taskbar_frame = tk.Frame(cont_app, bg='#ff47e3', width=final_screen)
+taskbar_frame.pack(fill='none',)
 taskbar_frame.bind("<Button-1>", on_taskbar_click)
 
 # Crear otro frame que englobe tanto el taskbar como los íconos
-taskbar_wrapper = tk.Frame(root, bg='#ff0cde')
+taskbar_wrapper = tk.Frame(taskbar_frame, bg='#1c91ff')
 taskbar_wrapper.pack(fill='both', expand=True)
 
 # Asociar los eventos de hover a todo el área del taskbar y los íconos
@@ -96,11 +107,9 @@ taskbar_wrapper.bind('<Enter>', slide_down)
 taskbar_wrapper.bind('<Leave>', slide_up)
 taskbar_frame.bind('<Enter>', slide_down)
 # Crea botones o íconos para simular la barra de tareas
-button = tk.Button(taskbar_wrapper, text='Inicio', command=root.quit)
-button.pack(side='left',)
+
 
 # Crear un botón que lleva al escritorio (minimiza todas las ventanas)
-
 desktop_button = tk.Button(taskbar_frame, text="Desktop", command=show_desktop,
                            background='#ec0d0d', relief='flat', height=50)
 desktop_button.pack(side='right', fill='y')
