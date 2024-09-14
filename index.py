@@ -35,11 +35,17 @@ def activate_window(hwnd):
 
 def listar_aplicaciones_abiertas():
     def enum_windows_callback(hwnd, windows):
+        # Obtener el estilo de la ventana para verificar si está en la barra de tareas
+        window_style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
         # Solo ventanas visibles con título
-        if win32gui.IsWindowVisible(hwnd) and win32gui.GetWindowText(hwnd):
+        if win32gui.IsWindowVisible(hwnd) and win32gui.GetWindowText(hwnd) and (window_style & win32con.WS_EX_APPWINDOW) == win32con.WS_EX_APPWINDOW:
             _, pid = win32process.GetWindowThreadProcessId(hwnd)
             if psutil.pid_exists(pid):  # Verificar que el proceso exista
+                # Verificar que la ventana no esté minimizada
+                #if win32gui.IsIconic(hwnd):
+                #   return True  # La ventana está minimizada, no la añadimos
                 windows.append((hwnd, win32gui.GetWindowText(hwnd)))
+           
         return True
 
     open_windows = []
@@ -61,9 +67,6 @@ def listar_aplicaciones_abiertas():
             app_icon.pack(side='right', padx=5)
             app_icon.bind("<Button-1>", lambda event,
                           hwnd=hwnd: activate_window(hwnd))
-
-  
-
     root.after(2000, listar_aplicaciones_abiertas)
 
 
@@ -90,10 +93,8 @@ button = tk.Button(cont_app, text='Close',
                    background='#fff', command=root.quit)
 button.pack(side='left',)
 
-
-taskbar_frame = tk.Frame(cont_app, bg='#ff47e3', width=final_screen)
+taskbar_frame = tk.Frame(cont_app, bg='#75ff47', width=final_screen)
 taskbar_frame.pack(fill='none',)
-taskbar_frame.bind("<Button-1>", on_taskbar_click)
 
 # Crear otro frame que englobe tanto el taskbar como los íconos
 taskbar_wrapper = tk.Frame(taskbar_frame, bg='#1c91ff')
@@ -107,8 +108,6 @@ cont_app.bind('<Leave>', lambda event: slide_up(
     root, final_screen, position_x))
 taskbar_frame.bind('<Enter>', lambda event:  slide_down(
     root, final_screen, position_x))
-# Crea botones o íconos para simular la barra de tareas
-
 
 # Crear un botón que lleva al escritorio (minimiza todas las ventanas)
 desktop_button = tk.Button(taskbar_frame, text="Desktop", command=show_desktop,
