@@ -4,12 +4,13 @@ from tkinter import messagebox
 import pygetwindow as gw  # type: ignore
 import pyautogui  # type: ignore
 from utils.func import get_window_icon, show_desktop, show_msg  # type: ignore
-
 import win32gui
 import win32con
 import win32process
 import psutil
-from PIL import Image, ImageTk  # type: ignore
+from PIL import Image, ImageTk
+
+from utils.topTaskBehavior import slide_down, slide_up  # type: ignore
 
 root = tk.Tk()
 screen_width = root.winfo_screenwidth()
@@ -20,13 +21,6 @@ position_x = (screen_width - final_screen) // 2
 # position_y = (screen_height - window_height) // 2
 # Función para aumentar la altura al hacer hover
 
-def slide_down(event):
-    root.geometry(f'{final_screen}x50+{position_x}+0')  # Cambia la altura a 50
-# Función para reducir la altura cuando se quite el hover
-
-def slide_up(event):
-    root.geometry(f'{final_screen}x5+{position_x}+0')  # Cambia la altura a 5
-# Función para traer la ventana al frente
 
 def activate_window(hwnd):
     try:
@@ -37,6 +31,8 @@ def activate_window(hwnd):
     except Exception as e:
         print(f"Error al activar la ventana: {e}")
 # Función para listar las ventanas activas
+
+
 def listar_aplicaciones_abiertas():
     def enum_windows_callback(hwnd, windows):
         # Solo ventanas visibles con título
@@ -58,7 +54,7 @@ def listar_aplicaciones_abiertas():
         icon_img = get_window_icon(hwnd)
 
         if icon_img:
-            icon_img = icon_img.resize((30, 30))  # Redimensionar el ícono
+            icon_img = icon_img.resize((40, 40))  # Redimensionar el ícono
             icon_tk = ImageTk.PhotoImage(icon_img)
             app_icon = tk.Label(taskbar_frame, image=icon_tk, bg='lightblue')
             app_icon.image = icon_tk  # Guardar la referencia para evitar que el ícono se destruya
@@ -66,12 +62,10 @@ def listar_aplicaciones_abiertas():
             app_icon.bind("<Button-1>", lambda event,
                           hwnd=hwnd: activate_window(hwnd))
 
-    desktop_button = tk.Button(taskbar_frame, text="Desktop", command=show_desktop,
-                           background='#ec0d0d', relief='flat', height=50)
-    desktop_button.pack(side='right', fill='y')
+  
 
     root.after(2000, listar_aplicaciones_abiertas)
-    
+
 
 root.geometry(f'{final_screen}x5+{position_x}+{0}')
 root.overrideredirect(True)  # Elimina la barra de título
@@ -79,17 +73,21 @@ root.configure(bg='#000000')
 root.attributes('-alpha', 0.8)
 root.attributes('-topmost', True)
 
+
 def on_taskbar_click(event):
     root.quit()
     # show_desktop()
 
+
 def show_desktop(event):
     pyautogui.hotkey('win', 'd')
 
-cont_app = tk.Frame(root , bg='#f77f0e', width=final_screen )
-cont_app.pack(fill='both' ,)
-cont_app.bind("<Button-1>",show_desktop)
-button = tk.Button(cont_app, text='Close',  background='#fff', command=root.quit)
+
+cont_app = tk.Frame(root, bg='#c221eb', width=final_screen)
+cont_app.pack(fill='both',)
+cont_app.bind("<Button-1>", show_desktop)
+button = tk.Button(cont_app, text='Close',
+                   background='#fff', command=root.quit)
 button.pack(side='left',)
 
 
@@ -103,9 +101,12 @@ taskbar_wrapper.pack(fill='both', expand=True)
 
 # Asociar los eventos de hover a todo el área del taskbar y los íconos
 # Cuando el ratón entra en el área visible
-taskbar_wrapper.bind('<Enter>', slide_down)
-taskbar_wrapper.bind('<Leave>', slide_up)
-taskbar_frame.bind('<Enter>', slide_down)
+taskbar_wrapper.bind('<Enter>', lambda event:  slide_down(
+    root, final_screen, position_x))
+cont_app.bind('<Leave>', lambda event: slide_up(
+    root, final_screen, position_x))
+taskbar_frame.bind('<Enter>', lambda event:  slide_down(
+    root, final_screen, position_x))
 # Crea botones o íconos para simular la barra de tareas
 
 
