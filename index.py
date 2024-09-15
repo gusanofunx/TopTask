@@ -9,7 +9,6 @@ import win32con
 import win32process
 import psutil
 from PIL import Image, ImageTk
-
 from utils.topTaskBehavior import slide_down, slide_up  # type: ignore
 
 root = tk.Tk()
